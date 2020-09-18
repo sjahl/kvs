@@ -42,11 +42,11 @@ func setValueHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//func getValueHandler
 func getValueHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	decode := json.NewDecoder(r.Body)
 	req := &KeyValue{}
+	w.Header().Set("Content-Type", "application/json")
 
 	if err := decode.Decode(req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -73,14 +73,44 @@ func getValueHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//func getValuesHandler
+func getValuesHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	b, err := json.Marshal(kv_store)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, string(b))
+}
 
-//func dropValueHandler
+func dropValueHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	decode := json.NewDecoder(r.Body)
+	req := &KeyValue{}
+
+	if err := decode.Decode(req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	delete(kv_store, req.Key)
+	w.Header().Set("Content-Type", "application/json")
+	response := &ActionResp{Ok: true, Message: "success"}
+	b, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Fprintf(w, string(b))
+}
 
 func main() {
 
 	http.HandleFunc("/set", setValueHandler)
 	http.HandleFunc("/get", getValueHandler)
+	http.HandleFunc("/all", getValuesHandler)
+	http.HandleFunc("/drop", dropValueHandler)
 
 	if err := http.ListenAndServe(":8000", nil); err != nil {
 		log.Fatal(err)
