@@ -2,23 +2,22 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
 	"fmt"
 	"log"
+	"net/http"
 )
 
 var kv_store = make(map[string]interface{})
 
 type KeyValue struct {
-	Key string `json:"key"`
+	Key   string      `json:"key"`
 	Value interface{} `json:"value"`
 }
 
 type ActionResp struct {
-	Ok bool `json:"ok"`
+	Ok      bool   `json:"ok"`
 	Message string `json:"message"`
 }
-
 
 func setValueHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -69,7 +68,6 @@ func getValueHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprintf(w, string(b))
-
 
 }
 
