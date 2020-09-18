@@ -1,18 +1,91 @@
 package main
 
 import (
-	// "encoding/json"
+	"encoding/json"
 	"net/http"
 	"fmt"
 	"log"
 )
 
-func valueHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World")
+var kv_store = make(map[string]interface{})
+
+// handling an incoming request to set a value
+// 0. have a map of strings to interface{}
+// 1. parse the JSON into the keyvalue struct
+// 2. pass t
+
+type KeyValue struct {
+	Key string `json:"key"`
+	Value interface{} `json:"value"`
 }
 
+type ActionResp struct {
+	Ok bool `json:"ok"`
+	Message string `json:"message"`
+}
+
+
+func setValueHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	decode := json.NewDecoder(r.Body)
+	req := &KeyValue{}
+
+	if err := decode.Decode(req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	kv_store[req.Key] = req.Value
+	w.Header().Set("Content-Type", "application/json")
+	response := &ActionResp{Ok: true, Message: "success"}
+	b, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
+
+}
+
+//func getValueHandler
+func getValueHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	decode := json.NewDecoder(r.Body)
+	req := &KeyValue{}
+
+	if err := decode.Decode(req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	value := kv_store[req.Key]
+
+	if value == nil {
+		response := &ActionResp{Ok: false, Message: "unable to find key"}
+		b, _ := json.Marshal(response)
+		fmt.Println(string(b))
+	}
+
+	response := value
+	b, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
+
+
+}
+
+//func getValuesHandler
+
+//func dropValueHandler
+
 func main() {
-	http.HandleFunc("/value", valueHandler)
+
+	http.HandleFunc("/set", setValueHandler)
+	http.HandleFunc("/get", getValueHandler)
+
 	if err := http.ListenAndServe(":8000", nil); err != nil {
 		log.Fatal(err)
 	}
