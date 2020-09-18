@@ -38,7 +38,7 @@ func setValueHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(b))
+	fmt.Fprintf(w, string(b))
 
 }
 
@@ -58,7 +58,8 @@ func getValueHandler(w http.ResponseWriter, r *http.Request) {
 	if value == nil {
 		response := &ActionResp{Ok: false, Message: "unable to find key"}
 		b, _ := json.Marshal(response)
-		fmt.Println(string(b))
+		fmt.Fprintf(w, string(b))
+		return
 	}
 
 	response := value
@@ -67,7 +68,7 @@ func getValueHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(b))
+	fmt.Fprintf(w, string(b))
 
 
 }
