@@ -9,11 +9,6 @@ import (
 
 var kv_store = make(map[string]interface{})
 
-// handling an incoming request to set a value
-// 0. have a map of strings to interface{}
-// 1. parse the JSON into the keyvalue struct
-// 2. pass t
-
 type KeyValue struct {
 	Key string `json:"key"`
 	Value interface{} `json:"value"`
